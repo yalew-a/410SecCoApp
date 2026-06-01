@@ -13,7 +13,7 @@ CheckIP is a web application designed for Security Operations Center (SOC) analy
 - Upload a file containing multiple IP addresses
 - View threat intelligence results from VirusTotal and AbuseIPDB
 - Perform WHOIS lookups
-- Store lookup results in a database
+- Store IP addresses in a database
 - User authentication and access control
 
 ### Team Members
