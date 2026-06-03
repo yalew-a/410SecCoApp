@@ -1,5 +1,6 @@
 import secrets # Used to generate nonce
-from flask import Flask, request, jsonify, render_template, g # Flask is used for the web app
+from flask import Flask, request, jsonify, render_template, g, session, redirect, url_for, flash # Flask is used for the web app
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_sqlalchemy import SQLAlchemy # Lets us add to the db using Python classes instead of using SQL
 from google.cloud import secretmanager # To get secrets from Secret Manager
 from google.cloud.sql.connector import Connector, IPTypes # For connecting to GCP Cloud SQL db
@@ -7,6 +8,7 @@ import pymysql # For db
 import requests # requests for API calls
 from ipwhois import IPWhois # Used for a whois lookup
 import pycountry # Used to get full country name from country code
+import json
 
 # Get secrets from Secret Manager
 def get_secret(secret_id):
@@ -30,6 +32,11 @@ DB_PASS = get_secret("DB_PASS")
 DB_NAME = get_secret("DB_NAME")
 # Format: "project:region:instance-name"
 INSTANCE_CONNECTION_NAME = get_secret("INSTANCE_CONNECTION_NAME")
+
+AUTH_DATA = json.loads(get_secret("APP_AUTH"))
+USERS = {
+    AUTH_DATA['user']: generate_password_hash(AUTH_DATA['pass'])
+}
 
 # Cloud SQL connector setup
 connector = Connector()
@@ -292,10 +299,43 @@ class HideServerVersion:
 
 app.wsgi_app = HideServerVersion(app.wsgi_app)
 
+
+# Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # If already logged in, go to home
+    if 'user_id' in session:
+        return redirect(url_for('check_reputation'))
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user_hash = USERS.get(username)
+        
+        if user_hash and check_password_hash(user_hash, password):
+            session['user_id'] = username
+            session.permanent = True # Session lasts until browser close
+            return redirect(url_for('check_reputation'))
+        else:
+            flash("Invalid username or password.", "danger")
+            
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash("You have been logged out.", "success")
+    return redirect(url_for('login'))
+
 # Main page
 @app.route('/', methods=["GET", "POST"])
 @app.route('/checkip', methods=["GET", "POST"])
 def check_reputation():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
     whois_results = None
     vt_results = None
     adb_results = None

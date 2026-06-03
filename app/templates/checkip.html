@@ -31,7 +31,7 @@
     <link
       rel="stylesheet"
       nonce="{{ g.nonce }}"
-      href="{{ url_for('static', filename='styles.css') }}"
+      href="{{ url_for('static', filename='/css/styles.css') }}"
     />
     <style nonce="{{ g.nonce }}">
       .dynamic-border-{{ vt_results.id }} {
@@ -113,9 +113,15 @@
           Results for:
           <span class="text-dark rb-font">{{ ip }}</span>
         </h4>
-        <button type="button" class="saveBtn" id="save-ip-btn">
+        <button
+          type="button"
+          class="saveDbBtn"
+          id="save-ip-btn"
+          data-ip="{{ ip }}"
+        >
           <i class="bi bi-plus-circle"></i> Save to database
         </button>
+        <script src="{{ url_for('static', filename='/js/save_ip.js') }}"></script>
       </div>
       {% endif %}
 
@@ -360,43 +366,6 @@
       </div>
       {% endif %}
     </div>
-    <script nonce="{{ g.nonce }}">
-      document
-        .getElementById("save-ip-btn")
-        .addEventListener("click", function () {
-          const ipAddress = "{{ ip }}";
-          const btn = this;
-
-          // Disable button to prevent double clicks
-          btn.disabled = true;
-          btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
-
-          fetch("/save_ip", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ ip: ipAddress }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.status === "success") {
-                btn.classList.replace("saveBtn", "btn-success");
-                btn.className = "btn btn-success btn-sm";
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved to DB';
-              } else {
-                alert("Error: " + data.message);
-                btn.disabled = false;
-                btn.innerHTML =
-                  '<i class="bi bi-exclamation-triangle"></i> Try Again';
-              }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              btn.disabled = false;
-            });
-        });
-    </script>
   </body>
   <!-- Footer -->
   <footer class="text-center mt-5 mb-5">
