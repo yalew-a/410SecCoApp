@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CIS 410 Final</title>
+
+    <!-- Import Fonts, Bootstrap, and Icons -->
+    <link
+      rel="stylesheet"
+      nonce="{{ g.nonce }}"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      nonce="{{ g.nonce }}"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@700&display=swap"
+    />
+
+    <link
+      rel="stylesheet"
+      nonce="{{ g.nonce }}"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      nonce="{{ g.nonce }}"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+
+    <link
+      rel="stylesheet"
+      nonce="{{ g.nonce }}"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <style nonce="{{ g.nonce }}">
+      .dynamic-border-{{ vt_results.id }} {
+          border-left-color: {{ vt_results.m_color }} !important; }
+    </style>
+  </head>
+
+  <body>
+    <div
+      class="container bg-light shadow p-5 rounded mt-5"
+      style="max-width: 800px"
+    >
+      <!-- Header Section -->
+      <div class="mb-5 text-center text-sm-start">
+        <a href="/">
+          <h1 class="fw-bold mb-2 tracking-tight">
+            <span class="theme-color">Check</span>IP
+          </h1>
+        </a>
+        <p class="text-muted fs-5 title-font">
+          Check IP address reputation with VirusTotal and AbuseIPDB APIs.
+        </p>
+      </div>
+
+      <!-- Search Input Section -->
+      <div class="table-container mb-4">
+        <label for="ipInput" class="form-label fw-medium text-secondary"
+          >Enter an IP address</label
+        >
+        <form method="post" enctype="multipart/form-data">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-white text-muted border-end-0"
+              ><i class="bi bi-search"></i
+            ></span>
+            <input
+              type="text"
+              id="ipInput"
+              name="ip"
+              class="form-control border-start-0 ps-2"
+            />
+            <button
+              class="fw-bold btn btn-custom px-4"
+              type="submit"
+              id="submitBtn"
+            >
+              Check
+            </button>
+          </div>
+          <div class="text-center mt-3">
+            <p class="mb-3 text-muted fw-medium">- Or -</p>
+          </div>
+          <label for="ipFile" class="form-label fw-medium text-secondary mb-2">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Upload a text file
+            with one IP per line (No commas or other separators)
+          </label>
+
+          <div class="input-group input-group-lg">
+            <!-- accept=".txt" makes sure the uploaded file is a text file -->
+            <input
+              type="file"
+              class="form-control"
+              id="ipFile"
+              name="ip_file"
+              accept=".txt"
+            />
+            <button class="btn btn-custom fw-bold px-4" type="submit">
+              Upload
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Results  -->
+      {% if vt_results or adb_results or whois_results %}
+      <div
+        class="mb-4 d-flex justify-content-between align-items-baseline gap-2"
+      >
+        <h4 class="fw-bold text-secondary mb-3">
+          Results for:
+          <span class="text-dark rb-font">{{ ip }}</span>
+        </h4>
+        <button type="button" class="saveBtn" id="save-ip-btn">
+          <i class="bi bi-plus-circle"></i> Save to database
+        </button>
+      </div>
+      {% endif %}
+
+      <!-- VirusTotal Card -->
+      {% if vt_results %}
+      <div
+        class="result-card mb-4"
+        style="border-left-color: {{ vt_results.m_color }};"
+      >
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">
+            <a
+              class="website-link"
+              href="https://www.virustotal.com/gui/ip-address/{{ip}}"
+            >
+              VirusTotal
+            </a>
+          </h5>
+        </div>
+
+        {% if vt_results.error %}
+        <div class="alert alert-danger py-2 mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ vt_results.error }}
+        </div>
+        {% else %}
+        <ul class="list-unstyled stat-list mb-0">
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-bug-fill text-danger me-2"></i>Malicious
+              Count</span
+            >
+            <span
+              class="badge bg-danger-subtle text-danger rounded-pill fw-bold rb-font"
+              style="color: {{ vt_results.m_color }} !important;"
+              >{{ vt_results.mal_count }} / {{ vt_results.total }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-exclamation-circle-fill text-warning me-2"></i
+              >Suspicious Count</span
+            >
+            <span
+              class="badge bg-warning-subtle text-warning rounded-pill fw-bold rb-font"
+              style="color: {{ vt_results.s_color }} !important;"
+              >{{ vt_results.sus_count }} / {{ vt_results.total }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-check-circle-fill text-success me-2"></i>Harmless
+              Count</span
+            >
+            <span
+              class="badge bg-success-subtle text-success rounded-pill fw-bold rb-font"
+              style="color: {{ vt_results.h_color }} !important;"
+              >{{ vt_results.harmless_count }} / {{ vt_results.total }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-question-circle text-secondary me-2"></i
+              >Undetected Count</span
+            >
+            <span class="text-muted fw-medium rb-font"
+              >{{ vt_results.und_count }} / {{ vt_results.total }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center pt-3">
+            <span class="fw-bold text-dark">Community Score</span>
+            <span
+              class="fw-bold fs-5 rb-font"
+              style="color: {{ vt_results.r_color }}"
+              >{{ vt_results.comm_score }}</span
+            >
+          </li>
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- AbuseIPDB Card -->
+      {% if adb_results %}
+      <div
+        class="result-card mb-4"
+        style="border-left-color: {{ adb_results.a_color }};"
+      >
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">
+            <a
+              class="website-link"
+              href="https://www.abuseipdb.com/check/{{ip}}"
+            >
+              AbuseIPDB
+            </a>
+          </h5>
+        </div>
+
+        {% if adb_results.error %}
+        <div class="alert alert-danger py-2 mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ adb_results.error }}
+        </div>
+        {% else %}
+        <ul class="list-unstyled stat-list mb-0">
+          <!-- Total Reports -->
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-flag-fill text-secondary me-2"></i>Total
+              Reports</span
+            >
+            <span class="fw-bold text-dark rb-font"
+              >{{ adb_results.total_reports }}</span
+            >
+          </li>
+
+          <!-- Score -->
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i
+                class="bi bi-shield-slash-fill me-2"
+                style="color: {{ adb_results.a_color }};"
+              ></i
+              >Abuse Confidence Score</span
+            >
+            <span
+              class="fw-bold fs-5 rb-font"
+              style="color: {{ adb_results.a_color }};"
+              >{{ adb_results.abuse_score }}%</span
+            >
+          </li>
+
+          <!-- Domain -->
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-globe me-2" style="color: rgb(2, 198, 198)"></i
+              >Domain name</span
+            >
+            <span class="fs-5 rb-font" style="color: {{ adb_results.a_color }};"
+              >{{ adb_results.a_domain }}</span
+            >
+          </li>
+
+          <!-- Hostnames -->
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i
+                class="bi bi-pc-display me-2"
+                style="color: rgb(2, 198, 198)"
+              ></i
+              >Hostname(s)</span
+            >
+            <span class="fs-5 rb-font" style="color: {{ adb_results.a_color }};"
+              >{{ adb_results.a_hostnames }}</span
+            >
+          </li>
+
+          <!-- Usage Type -->
+          <li class="d-flex justify-content-between align-items-center">
+            <span
+              ><i class="bi bi-tools me-2 text-secondary"></i>Usage Type</span
+            >
+            <span class="fs-5 rb-font" style="color: {{ adb_results.a_color }};"
+              >{{ adb_results.a_utype }}</span
+            >
+          </li>
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Whois Card -->
+      {% if whois_results %}
+      <div
+        class="result-card mb-4"
+        style="border-left-color: {{ whois_results.cn_color }};"
+      >
+        <h5 class="fw-bold mb-3">Whois</h5>
+
+        {% if whois_results.error %}
+        <div class="alert alert-danger py-2 mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ whois_results.error
+          }}
+        </div>
+        {% else %}
+        <ul class="list-unstyled stat-list mb-0">
+          <li class="d-flex justify-content-between align-items-start">
+            <span class="text-muted">Description</span>
+            <span class="fw-medium text-end w-70 text-dark rb-font"
+              >{{ whois_results.description }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span class="text-muted">Country:</span>
+            <span class="{{ whois_results.cn_badge }} text-dark fw-bold rb-font"
+              >{{ whois_results.country }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span class="text-muted">ASN</span>
+            <span class="font-monospace text-dark rb-font"
+              >{{ whois_results.asn }}</span
+            >
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span class="text-muted">ASN Date</span>
+            <span class="text-dark rb-font">{{ whois_results.date }}</span>
+          </li>
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- If list uploaded-->
+      {% if ip_list %}
+      <div class="mt-4 mx-auto" style="max-width: 600px">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="text-secondary fw-bold mb-0">
+            IP List - Click IP to check it's reputation.
+          </h5>
+          <span class="badge list-total-badge rounded-pill"
+            >{{ ip_list|length }} Total</span
+          >
+        </div>
+
+        <ul class="list-group shadow-sm">
+          {% for ip in ip_list %}
+          <li
+            class="website-link d-flex justify-content-between align-items-center py-3"
+          >
+            <div class="d-flex align-items-center">
+              <span class="text-muted small me-2 px-2">{{ loop.index }}</span>
+              <a
+                href="{{ url_for('check_reputation', ip=ip) }}"
+                class="text-decoration-none fw-bold"
+              >
+                <span class="list-link">{{ ip }}</span>
+              </a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    <script nonce="{{ g.nonce }}">
+      document
+        .getElementById("save-ip-btn")
+        .addEventListener("click", function () {
+          const ipAddress = "{{ ip }}";
+          const btn = this;
+
+          // Disable button to prevent double clicks
+          btn.disabled = true;
+          btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+
+          fetch("/save_ip", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ip: ipAddress }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === "success") {
+                btn.classList.replace("saveBtn", "btn-success");
+                btn.className = "btn btn-success btn-sm";
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved to DB';
+              } else {
+                alert("Error: " + data.message);
+                btn.disabled = false;
+                btn.innerHTML =
+                  '<i class="bi bi-exclamation-triangle"></i> Try Again';
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              btn.disabled = false;
+            });
+        });
+    </script>
+  </body>
+  <!-- Footer -->
+  <footer class="text-center mt-5 mb-5">
+    <p class="small text-muted">
+      CLI Version:
+      <a href="https://github.com/JaidenKemara/checkip"
+        ><i class="bi-github gIcon" style="color: purple"></i
+      ></a>
+    </p>
+  </footer>
+</html>

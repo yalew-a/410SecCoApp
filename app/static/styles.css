@@ -1,0 +1,145 @@
+:root {
+  /* Since a few classes share styles, save them as a variable to be reused*/
+  --main-color: #70a9ff;
+  --main-hover: #70a9ff;
+  --bg-color: #f4f6f9;
+  --card-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif;
+  background-color: var(--bg-color);
+  color: #1e293b;
+  background-image: radial-gradient(#70a9ff 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+footer {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input {
+  font-family: "Roboto", sans-serif;
+}
+
+.theme-color {
+  color: var(--main-color);
+}
+
+.list-total-badge {
+  background-color: var(--main-color);
+}
+
+.btn-custom {
+  background-color: var(--main-color);
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.btn-custom:hover {
+  background-color: var(--main-hover);
+  color: white;
+}
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.result-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+  border-left: 5px solid var(--main-color);
+}
+
+.result-card:hover {
+  transform: scale(1.03);
+  transition: transform 0.2s ease-in-out;
+}
+
+.website-link {
+  color: black;
+  text-decoration: none;
+}
+
+.website-link:hover {
+  color: var(--main-color);
+  transition: color 0.2s ease;
+}
+
+.list-link {
+  font-family: "Roboto", sans-serif;
+  color: black;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.list-link:hover {
+  color: var(--main-color);
+  transform: scale(1.07);
+  transition: transform 0.2s ease-in-out;
+}
+
+.iconBtn {
+  color: inherit;
+}
+
+.iconBtn:hover {
+  color: var(--main-color);
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.stat-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.stat-list li:last-child {
+  border-bottom: none;
+}
+
+#ipFile::file-selector-button {
+  background-color: var(--main-color);
+  color: white;
+  border-radius: 10px;
+  border-inline-end-width: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.gIcon {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.gIcon:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+.rb-font {
+  font-family: "Roboto", sans-serif;
+}
+
+.saveBtn {
+  border: none;
+  background-color: inherit;
+}
+
+.saveBtn:hover {
+  color: var(--main-color);
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
