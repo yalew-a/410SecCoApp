@@ -1,0 +1,32 @@
+name: Security Scanning (SAST/SCA)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  security-scans:
+    name: Snyk Security Audits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Snyk Code (SAST)
+        uses: snyk/actions/python@master
+        continue-on-error: false
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: code test
+
+      - name: Run Snyk Open Source
+        uses: snyk/actions/python@master
+        continue-on-error: false 
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
