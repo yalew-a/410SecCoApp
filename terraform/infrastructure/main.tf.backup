@@ -1,3 +1,5 @@
+# Creates a Google Cloud Storage bucket in your GCP project
+
 terraform {
   required_version = ">= 1.6"
 
@@ -14,23 +16,17 @@ provider "google" {
   region  = var.region
 }
 
-# Terraform State Storage Bucket
+# Google Cloud Storage bucket — used as Terraform state backend in Week 7
 resource "google_storage_bucket" "tf_state" {
   name          = "${var.project_id}-tfstate"
   location      = "US"
   force_destroy = true
 
-  uniform_bucket_level_access = true
-
   versioning {
     enabled = true
   }
-}
 
-# Artifact Registry Repository for Docker Images
-resource "google_artifact_registry_repository" "checkip_repo" {
-  location      = var.region
-  repository_id = "checkip-repo"
-  description   = "Docker repository for CheckIP"
-  format        = "DOCKER"
-}
+  lifecycle_rule {
+    condition {
+      num_newer_versions = 5
+    }
