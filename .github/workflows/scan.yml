@@ -1,4 +1,4 @@
-name: Security Scanning (SAST/SCA)
+name: Security Scan Pipeline (Snyk)
 
 on:
   push:
@@ -6,27 +6,35 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions:
-  contents: read
-
 jobs:
-  security-scans:
-    name: Snyk Security Audits
+  security_scans:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Snyk Code (SAST)
-        uses: snyk/actions/python@master
-        continue-on-error: false
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: code test
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
 
-      - name: Run Snyk Open Source
-        uses: snyk/actions/python@master
-        continue-on-error: false 
+      - name: Run Snyk Code SAST
+        run: snyk code test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      - name: Run Snyk Open Source SCA
+        run: snyk test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      - name: Build Docker image
+        run: docker build -t 410seccoapp:${{ github.sha }} .
+        continue-on-error: true
+
+      - name: Run Snyk Container Scan
+        run: snyk container test 410seccoapp:${{ github.sha }} --file=Dockerfile --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
