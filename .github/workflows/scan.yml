@@ -24,7 +24,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Snyk Open Source SCA
-        run: snyk test --severity-threshold=high
+        run: snyk test --file=app/requirements.txt --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
