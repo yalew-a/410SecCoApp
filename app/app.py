@@ -62,7 +62,7 @@ db = SQLAlchemy(app)
 class SearchLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip_address = db.Column(db.String(45), nullable=False)
-    timestamp = db.Column(db.DateTime, server_default=db.func.now())
+    time_added = db.Column(db.DateTime, server_default=db.func.now())
 
 # Initialize table on startup
 with app.app_context():
