@@ -1,0 +1,46 @@
+name: Deploy Cloud Run
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_EMAIL }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ vars.REGISTRY }} --quiet
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ vars.SERVICE }} \
+            --image ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }} \
+            --region ${{ vars.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
