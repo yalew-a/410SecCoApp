@@ -35,6 +35,56 @@ resource "google_artifact_registry_repository" "checkip_repo" {
   format        = "DOCKER"
 }
 
+# Secret Manager Secrets
+
+resource "google_secret_manager_secret" "vt_api_key" {
+  secret_id = "VT_API_KEY"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "ipdb_api_key" {
+  secret_id = "IPDB_API_KEY"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "db_user" {
+  secret_id = "DB_USER"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "db_pass" {
+  secret_id = "DB_PASS"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "db_name" {
+  secret_id = "DB_NAME"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "instance_connection_name" {
+  secret_id = "INSTANCE_CONNECTION_NAME"
+
+  replication {
+    auto {}
+  }
+}
+
 # Networking Module
 module "networking" {
   source      = "./modules/networking"
