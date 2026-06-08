@@ -1,3 +1,12 @@
+# Security Scan #1 
+
+# Synk Container Scan
+- No patching necessary, no vulnerabilities found
+
+
+# for Snyk SCA (Dependencies)
+
+# *vulnerabilities have now been patched as of 06/07/26*
 # [ISSUES PATCHED _06/07/26_]
 
 ### Upgraded:
