@@ -85,9 +85,20 @@ def virus_total_lookup(IP):
         # Save reponse to vt_data
         vt_data = requests.get(url, headers = headers).json()
 
-    # Returns error if the API can't be reached
+    # If there is an error, return this instead of showing the error to the user.
     except requests.ConnectionError:
-        return "Connection Error"
+        return {
+        "mal_count":      "N/A",
+        "sus_count":      "N/A",
+        "harmless_count": "N/A",
+        "und_count":      "N/A",
+        "total":          "N/A",
+        "comm_score":     "N/A",
+        "m_color":        "#64748b",
+        "s_color":        "#64748b",
+        "h_color":        "#64748b",
+        "r_color":        "#64748b"
+    }
 
     # Get the analysis stats from the json data (vt_data)
     analysis_stats = (
@@ -173,8 +184,15 @@ def abuse_ipdb_lookup(IP):
         ipdb_data = requests.get(url, headers=headers, params=params).json()
 
     except requests.ConnectionError:
-        # Return error if API can't be reached
-        return "Connection Error"
+        # If there is an error, return this instead of showing the error to the user.
+        return {
+        "total_reports": "N/A",
+        "abuse_score":   "N/A",
+        "a_color":       "#64748b",
+        "a_domain":      "N/A",
+        "a_hostnames":   "N/A",
+        "a_utype":       "N/A"
+    }
 
     # Get the abuse confidence score from the json data (ipdb_data)
     abuse_score = ipdb_data.get("data", {}).get("abuseConfidenceScore", 0)
@@ -242,7 +260,15 @@ def whois_lookup(IP):
         return whois_results
     
     except Exception as e:
-        return f"Error: {e}"
+        # If there is an error, return this instead of showing the error to the user.
+        return {
+            "description": "N/A",
+            "country": "N/A",
+            "asn": "N/A",
+            "date": "N/A",
+            "cn_color": "#64748b",
+            "cn_badge": "badge bg-secondary-subtle",
+        }
 
 # Flask app security code from the labs slightly modified for our use case
 # ── Generate a CSP nonce per request ─────────────────────────────────────────
