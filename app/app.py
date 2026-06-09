@@ -9,14 +9,13 @@ import requests # requests for API calls
 from ipwhois import IPWhois # Used for a whois lookup
 import pycountry # Used to get full country name from country code
 import json
+import os
 
 # Get secrets from Secret Manager
 def get_secret(secret_id):
     client = secretmanager.SecretManagerServiceClient()
 
-    # Replace 'PROJECT_ID' with the actual GCP Project ID
-    project_id = "PROJECT_ID"
-
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT", "seccoapp")
 
     name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
     response = client.access_secret_version(request={"name": name})
@@ -48,7 +47,7 @@ def getconn() -> pymysql.connections.Connection:
         user=DB_USER,
         password=DB_PASS,
         db=DB_NAME,
-        ip_type=IPTypes.PUBLIC
+        ip_type=IPTypes.PRIVATE
     )
     return conn
 
