@@ -1,0 +1,76 @@
+name: Pipeline Security Scan (Snyk)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # -- Snyk SAST Scan --
+  snyk-code:
+    name: "Snyk Code (SAST)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Run Snyk Code SAST
+        run: snyk code test --severity-threshold=medium app/
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+  # -- Snyk SCA Scan --
+  snyk-deps:
+    name: "Snyk SCA (Dependencies)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r app/requirements.txt
+
+      - name: Run Snyk Open Source SCA
+        run: snyk test --file=app/requirements.txt --severity-threshold=medium
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+  # -- Snyk Container Scan --
+  snyk-container:
+    name: "Snyk Container Scan"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Build Docker image
+        run: docker build -t 410seccoapp:${{ github.sha }} .
+        continue-on-error: true
+
+      - name: Run Snyk Container Scan
+        run: snyk container test 410seccoapp:${{ github.sha }} --file=Dockerfile --severity-threshold=medium
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
