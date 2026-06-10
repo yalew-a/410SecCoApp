@@ -1,19 +1,19 @@
 variable "project_id" {
-  description = "GCP Project ID"
   type        = string
+  description = "The GCP Project ID"
 }
 
 variable "region" {
-  description = "GCP Region"
   type        = string
+  description = "The target GCP Region"
 }
 
 variable "vpc_name" {
-  description = "VPC Name"
   type        = string
+  description = "The name of the VPC network"
 }
 
 variable "subnet_cidr" {
-  description = "Subnet CIDR Range"
   type        = string
+  description = "The IP CIDR range for the primary private subnet"
 }
