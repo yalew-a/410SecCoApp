@@ -1,9 +1,14 @@
 name: Deploy Cloud Run
 
 on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch: # changed to manual trigger — intentional promotion gate
+
+env:
+  REGION: us-central1
+  REGISTRY: us-central1-docker.pkg.dev
+  REPO: checkip-repo # Artifact Registry repository name
+  IMAGE: add-name # Docker image name
+  SERVICE: add-name # Cloud Run service name
 
 permissions:
   contents: read
@@ -17,30 +22,47 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+        # Auth to GCP
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ vars.WIF_PROVIDER }}
           service_account: ${{ vars.SA_EMAIL }}
 
+        # Set up Cloud SDK
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
         run: gcloud auth configure-docker ${{ vars.REGISTRY }} --quiet
 
-      - name: Build Docker image
+        # Build and push the image
+      - name: Build + push image
         run: |
-          docker build -t ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }} .
+          PROJECT_ID=${{ vars.TF_VAR_PROJECT_ID }}
+          IMAGE_PATH=${{ env.REGISTRY }}/${PROJECT_ID}/${{ env.REPO }}/${{ env.IMAGE }}:${{ github.sha }}
+          docker build -t ${IMAGE_PATH} .
+          docker push ${IMAGE_PATH}
+          # Save the full image path for the deploy step
+          echo "IMAGE_PATH=${IMAGE_PATH}" >> $GITHUB_ENV
 
-      - name: Push Docker image
-        run: |
-          docker push ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }}
-
+        # Deploy app to Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ vars.SERVICE }} \
             --image ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }} \
             --region ${{ vars.REGION }} \
             --platform managed \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --max-instances 3 \
+            --quiet
+
+        # Print app URL
+      - name: Print service URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --format "value(status.url)")
+          echo "✅ Service deployed successfully"
+          echo "🌐 URL: ${SERVICE_URL}"
+          echo "🔖 Image: ${{ env.IMAGE_PATH }}"
