@@ -13,7 +13,7 @@ variable "vpc_name" {
   description = "The name of the VPC network"
 }
 
-variable "subnet_cidr" {
+variable "app_subnet_cidr" {
   type        = string
-  description = "The IP CIDR range for the primary private subnet"
+  description = "The IP CIDR range for the dedicated Cloud Run Serverless VPC Connector subnet (e.g., 10.0.1.0/28)"
 }
