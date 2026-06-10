@@ -63,9 +63,12 @@ class SearchLog(db.Model):
     ip_address = db.Column(db.String(45), nullable=False)
     time_added = db.Column(db.DateTime, server_default=db.func.now())
 
-# Initialize table on startup
-with app.app_context():
-    db.create_all()
+try:
+    with app.app_context():
+        db.create_all()
+    print("Database connection and tables verified successfully.")
+except Exception:
+    print(f"error")
 
 
 # Function for Virus Total API call

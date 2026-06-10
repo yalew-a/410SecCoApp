@@ -1,5 +1,3 @@
-
-
 resource "google_sql_database_instance" "mysql" {
   name             = "checkip-mysql"
   database_version = "MYSQL_8_0"

@@ -13,7 +13,7 @@ output "connector_id" {
   value       = google_vpc_access_connector.connector.id
 }
 
-output "private_subnet_name" {
-  description = "The name of the core private subnet"
-  value       = google_compute_subnetwork.private.name
+output "app_subnet_name" {
+  description = "The name of the dedicated subnet used by the Cloud Run VPC Access Connector"
+  value       = google_compute_subnetwork.vpc_connector_subnet.name
 }
