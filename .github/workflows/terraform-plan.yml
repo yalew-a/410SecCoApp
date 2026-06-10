@@ -2,14 +2,14 @@ name: Terraform Plan
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - "terraform/infrastructure/**"
+      - "terraform/**"
       - ".github/workflows/terraform-plan.yml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - "terraform/infrastructure/**"
+      - "terraform/**"
       - ".github/workflows/terraform-plan.yml"
   workflow_dispatch:
 
@@ -55,3 +55,16 @@ jobs:
         run: terraform plan -no-color
         env:
           TF_VAR_project_id: ${{ vars.TF_VAR_PROJECT_ID }}
+          TF_VAR_region: ${{ vars.TF_VAR_REGION }}
+
+          # Mock inputs for Secret Manager creation blocks (Prevents interactive prompts - this is causing the workflow to get stuck on Terraform Plan)
+          TF_VAR_vt_api_key_value: "placeholder_value"
+          TF_VAR_ipdb_api_key_value: "placeholder_value"
+          TF_VAR_db_pass_value: "placeholder_value"
+          TF_VAR_app_auth_pass: "placeholder_value"
+
+          # Mock inputs for plain-text strings (Prevents interactive prompts)
+          TF_VAR_db_user_value: "placeholder_value"
+          TF_VAR_db_name_value: "placeholder_value"
+          TF_VAR_app_auth_user: "placeholder_value"
+          TF_VAR_instance_connection_name_value: "${{ vars.TF_VAR_PROJECT_ID }}:${{ vars.TF_VAR_REGION }}:checkip-mysql"
