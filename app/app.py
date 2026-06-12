@@ -29,6 +29,8 @@ IPDB_API_KEY = get_secret("IPDB_API_KEY")
 DB_USER = get_secret("DB_USER")
 DB_PASS = get_secret("DB_PASS")
 DB_NAME = get_secret("DB_NAME")
+# Fetch your newly created secret from Secret Manager
+app.secret_key = get_secret("FLASK_SECRET_KEY")
 # Format: "project:region:instance-name"
 INSTANCE_CONNECTION_NAME = get_secret("INSTANCE_CONNECTION_NAME")
 
