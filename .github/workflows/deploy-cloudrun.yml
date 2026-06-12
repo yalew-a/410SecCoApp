@@ -34,7 +34,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
-        run: gcloud auth configure-docker ${{ vars.REGISTRY }} --quiet
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet # FIXED: vars -> env
 
         # Build and push the image
       - name: Build + push image
@@ -49,9 +49,9 @@ jobs:
         # Deploy app to Cloud Run
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy ${{ vars.SERVICE }} \
-            --image ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ vars.REPO }}/${{ vars.IMAGE }}:${{ github.sha }} \
-            --region ${{ vars.REGION }} \
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image ${{ env.IMAGE_PATH }} \
+            --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
             --max-instances 3 \
