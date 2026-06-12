@@ -7,8 +7,8 @@ env:
   REGION: us-central1
   REGISTRY: us-central1-docker.pkg.dev
   REPO: checkip-repo # Artifact Registry repository name
-  IMAGE: add-name # Docker image name
-  SERVICE: add-name # Cloud Run service name
+  IMAGE: flask-app # Docker image name
+  SERVICE: checkip-app # Cloud Run service name
 
 permissions:
   contents: read
